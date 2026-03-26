@@ -1,0 +1,11 @@
+node_modules/
+.env
+.DS_Store
+*.log
+*.db
+uploads/
+temp-cpanel-deploy/
+*-folder/
+*.zip
+*.tar.gz
+server.log
