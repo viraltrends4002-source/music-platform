@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Discovery - Next-Wave Music Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+    }
+
+    .glass-effect {
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .song-card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .song-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.3);
+    }
+
+    .scroll-horizontal {
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+
+    ::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(99, 102, 241, 0.5);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(99, 102, 241, 0.8);
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(99, 102, 241, 0.3);
+      border-radius: 50%;
+      border-top-color: #6366f1;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body class="text-white">
+
+  <!-- HEADER -->
+  <header class="glass-effect sticky top-0 z-40 border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 3v9.28c-1.591 0-3-1.409-3-3s1.409-3 3-3V3m0 13c2.209 0 4 1.791 4 4s-1.791 4-4 4-4-1.791-4-4 1.791-4 4-4m8-14V8c0 1.657 1.343 3 3 3s3-1.343 3-3V2h-6z"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold">Next-Wave</h1>
+            <p class="text-xs text-white/60">Music Discovery</p>
+          </div>
+        </div>
+        
+        <nav class="flex gap-4">
+          <a href="/" class="text-white/60 hover:text-white transition">Library</a>
+          <a href="/admin.html" class="text-white/60 hover:text-white transition">Admin</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-8">
+    <!-- SEARCH & FILTERS -->
+    <section class="mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Search -->
+        <div class="col-span-2">
+          <input 
+            type="text" 
+            id="searchInput"
+            placeholder="Search millions of songs, artists, albums..."
+            class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          />
+        </div>
+        
+        <!-- Source Filter -->
+        <div>
+          <select id="sourceFilter" class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="all">All Sources</option>
+            <option value="audius">Audius</option>
+            <option value="jamendo">Jamendo</option>
+            <option value="youtube">YouTube</option>
+            <option value="local">Local Uploads</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Quick Actions -->
+      <div class="flex gap-3 mt-4">
+        <button onclick="displayDiscoverPage()" class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 rounded-lg transition">
+          Discover
+        </button>
+        <button onclick="loadTrendingSongs()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition">
+          Trending
+        </button>
+        <button id="refreshBtn" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition ml-auto">
+          ⟲ Refresh
+        </button>
+      </div>
+    </section>
+
+    <!-- SONGS GRID -->
+    <section class="mb-8">
+      <div class="mb-6">
+        <h2 class="text-3xl font-bold mb-2">Discover Music</h2>
+        <p class="text-white/60">Stream thousands of tracks from Audius, Jamendo, YouTube, and more</p>
+      </div>
+      
+      <div id="songsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <!-- Songs will be loaded here -->
+      </div>
+    </section>
+  </main>
+
+  <!-- AUDIO PLAYER (Hidden) -->
+  <audio id="audioPlayer" crossorigin="anonymous"></audio>
+
+  <!-- MUSIC PLAYER BAR -->
+  <footer class="fixed bottom-0 left-0 right-0 glass-effect border-t border-white/10">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+      <!-- Progress Bar -->
+      <div class="mb-3 h-1 bg-white/10 rounded-full overflow-hidden cursor-pointer" onclick="seekAudio(event)">
+        <div id="progressBar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 w-0 transition-none"></div>
+      </div>
+
+      <!-- Player Content -->
+      <div class="flex items-center justify-between gap-4">
+        <!-- Song Info -->
+        <div class="flex items-center gap-3 min-w-0 flex-1">
+          <img id="currentCover" src="" alt="Cover" class="h-12 w-12 rounded object-cover bg-white/10" />
+          <div class="min-w-0">
+            <p id="currentSongTitle" class="text-sm font-semibold truncate">No song playing</p>
+            <p id="currentArtist" class="text-xs text-white/60 truncate">Select a track</p>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex items-center gap-3">
+          <!-- Time Display -->
+          <div class="hidden sm:flex text-xs text-white/60 gap-1">
+            <span id="currentTime">0:00</span>
+            <span>/</span>
+            <span id="songDuration">0:00</span>
+          </div>
+
+          <!-- Player Buttons -->
+          <button id="prevBtn" class="p-2 hover:bg-white/10 rounded-full transition">
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M6 6h2v12H6V6zm3.5 6l8.5 6V6l-8.5 6z"/>
+            </svg>
+          </button>
+
+          <button id="playBtn" class="p-3 bg-indigo-500 hover:bg-indigo-600 rounded-full transition">
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </button>
+
+          <button id="pauseBtn" class="p-3 bg-indigo-500 hover:bg-indigo-600 rounded-full transition hidden">
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+            </svg>
+          </button>
+
+          <button id="nextBtn" class="p-2 hover:bg-white/10 rounded-full transition">
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M16 18h2V6h-2v12zM2 6v12l8.5-6L2 6z"/>
+            </svg>
+          </button>
+
+          <!-- Volume Control -->
+          <div class="hidden md:flex items-center gap-2">
+            <svg class="h-4 w-4 text-white/60" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.26 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+            </svg>
+            <input id="volumeControl" type="range" min="0" max="100" value="100" class="w-20 h-1 bg-white/20 rounded cursor-pointer" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Add padding for footer -->
+  <div class="pb-24"></div>
+
+  <!-- SCRIPTS -->
+  <script src="discoverer.js"></script>
+  <script>
+    // Additional helper function for seeking
+    function seekAudio(event) {
+      const player = document.getElementById('audioPlayer');
+      if (!player.duration) return;
+      
+      const bar = event.currentTarget;
+      const rect = bar.getBoundingClientRect();
+      const percent = (event.clientX - rect.left) / rect.width;
+      player.currentTime = percent * player.duration;
+    }
+
+    // Refresh button functionality
+    document.getElementById('refreshBtn').addEventListener('click', async () => {
+      const btn = event.target;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="loading"></span>';
+      
+      await loadAllSongs();
+      displayDiscoverPage();
+      
+      btn.disabled = false;
+      btn.innerHTML = '⟲ Refresh';
+      showNotification('Refreshed successfully!', 'success');
+    });
+  </script>
+</body>
+</html>

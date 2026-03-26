@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Music Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-md">
+        <!-- Logo/Title -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-2">🎵 Music Platform</h1>
+            <p class="text-gray-200">Welcome Back</p>
+        </div>
+
+        <!-- Main Login Card -->
+        <div class="glass rounded-lg p-8 shadow-2xl">
+            <!-- Local Login Form -->
+            <form id="loginForm" class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-white text-sm font-medium mb-2">Email</label>
+                    <input type="email" id="email" placeholder="Your email" class="w-full px-4 py-3 rounded-lg bg-white/20 text-white placeholder-gray-300 border border-white/30 focus:outline-none focus:border-white" required>
+                </div>
+                <div>
+                    <label class="block text-white text-sm font-medium mb-2">Password</label>
+                    <input type="password" id="password" placeholder="Your password" class="w-full px-4 py-3 rounded-lg bg-white/20 text-white placeholder-gray-300 border border-white/30 focus:outline-none focus:border-white" required>
+                </div>
+
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg transition duration-200">
+                    Login
+                </button>
+
+                <div id="loginMessage" class="text-center text-sm text-red-200 hidden"></div>
+
+                <!-- Forgot Password Link -->
+                <div class="text-center">
+                    <a href="forgot-password.html" class="text-indigo-300 hover:text-indigo-100 text-sm font-semibold">Forgot password?</a>
+                </div>
+            </form>
+
+            <!-- Divider -->
+            <div class="flex items-center gap-4 mb-6">
+                <div class="flex-1 h-px bg-white/30"></div>
+                <span class="text-gray-300 text-sm">OR</span>
+                <div class="flex-1 h-px bg-white/30"></div>
+            </div>
+
+            <!-- Social Login Options -->
+            <div id="googleButtonContainer" class="mb-4"></div>
+
+            <!-- Apple Sign In -->
+            <button type="button" onclick="signInWithApple()" class="w-full bg-black hover:bg-gray-900 text-white font-bold py-3 rounded-lg transition duration-200 flex items-center justify-center gap-3">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.05 13.5c-.91 0-1.82-.55-2.19-1.46-.39-1.02-.03-2.21.85-2.75.51-.32.93-.81.93-1.54C16.64 6.23 15.41 5 13.88 5c-1.07 0-2.08.53-2.67 1.43-.59.9-1.6 1.4-2.67 1.4s-2.08-.5-2.67-1.4C4.6 5.53 3.59 5 2.52 5 1 5 .23 6.23.23 7.75c0 .73.42 1.22.93 1.54.88.54 1.24 1.73.85 2.75-.37.91-1.28 1.46-2.19 1.46H.2c.3.8.9 1.47 1.65 1.86.76.39 1.63.6 2.53.6h13.24c.9 0 1.77-.21 2.53-.6.75-.39 1.35-1.06 1.65-1.86h-.15zm-7.19-6.76c.59 0 1.17-.24 1.58-.67.41-.43.66-1.02.66-1.66 0-.64-.25-1.23-.66-1.66C10.44 2.24 9.86 2 9.27 2s-1.17.24-1.58.67c-.41.43-.66 1.02-.66 1.66 0 .64.25 1.23.66 1.66.41.43.99.67 1.58.67z"/>
+                </svg>
+                Sign in with Apple
+            </button>
+        </div>
+
+        <!-- Register Link -->
+        <div class="text-center text-gray-200 mt-6">
+            Don't have an account? <a href="register.html" class="text-indigo-300 hover:text-indigo-100 font-semibold">Register here</a>
+        </div>
+
+        <!-- Admin Login Link -->
+        <div class="text-center text-gray-300 mt-4 pt-4 border-t border-white/20">
+            <p class="text-sm mb-3">Are you an admin?</p>
+            <a href="admin.html" class="inline-block bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition duration-200">
+                Admin Login
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Google Sign In
+        function onSuccess(response) {
+            const token = response.credential;
+            const parts = token.split('.');
+            const payload = JSON.parse(atob(parts[1]));
+            
+            loginWithGoogle({
+                email: payload.email,
+                googleId: payload.sub,
+                name: payload.name,
+                picture: payload.picture
+            });
+        }
+
+        window.onload = function() {
+            // ⚠️ IMPORTANT: Replace with your actual Google Client ID from Google Cloud Console
+            const CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+            
+            // Check if CLIENT_ID is configured
+            if (CLIENT_ID === 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com') {
+                console.warn('Google Client ID not configured. Please add your Client ID.');
+                document.getElementById('googleButtonContainer').innerHTML = `
+                    <div class="bg-yellow-600/20 border border-yellow-500/30 rounded-lg p-4 mb-4 text-yellow-200 text-sm">
+                        ⚠️ Google Sign In temporarily unavailable. Please use email login.
+                    </div>
+                `;
+                return;
+            }
+            
+            try {
+                google.accounts.id.initialize({
+                    client_id: CLIENT_ID,
+                    callback: onSuccess
+                });
+                google.accounts.id.renderButton(
+                    document.getElementById('googleButtonContainer'),
+                    { theme: 'dark', size: 'large', width: '100%' }
+                );
+            } catch (error) {
+                console.error('Google initialization failed:', error);
+                document.getElementById('googleButtonContainer').innerHTML = `
+                    <div class="bg-red-600/20 border border-red-500/30 rounded-lg p-4 mb-4 text-red-200 text-sm">
+                        ❌ Google Sign In error. Use email login instead.
+                    </div>
+                `;
+            }
+        };
+
+        // Login with Google
+        async function loginWithGoogle(data) {
+            try {
+                const response = await fetch('/auth/google-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    localStorage.setItem('token', result.token);
+                    localStorage.setItem('user', JSON.stringify(result.user));
+                    
+                    // If no account type selected, go to selection page
+                    if (!result.user.accountType || result.user.accountType === 'pending') {
+                        window.location.href = 'select-account-type.html';
+                    } else {
+                        window.location.href = result.user.accountType === 'artist' 
+                            ? 'artist-dashboard.html' 
+                            : 'index.html';
+                    }
+                } else {
+                    showMessage(result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Google login failed: ' + error.message, 'error');
+            }
+        }
+
+        // Local Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    localStorage.setItem('token', result.token);
+                    localStorage.setItem('user', JSON.stringify(result.user));
+                    
+                    // Redirect based on account type
+                    window.location.href = result.user.accountType === 'artist' 
+                        ? 'artist-dashboard.html' 
+                        : 'index.html';
+                } else {
+                    showMessage(result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Login failed: ' + error.message, 'error');
+            }
+        });
+
+        function showMessage(message, type) {
+            const messageEl = document.getElementById('loginMessage');
+            messageEl.textContent = message;
+            messageEl.className = `text-center text-sm ${type === 'error' ? 'text-red-200' : 'text-green-200'}`;
+            messageEl.classList.remove('hidden');
+        }
+
+        // Sign in with Apple
+        async function signInWithApple() {
+            try {
+                alert('Apple Sign In configuration coming soon. Please use email login or Google Sign In.');
+            } catch (error) {
+                showMessage('Apple Sign In failed: ' + error.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel - Next-Wave Music</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* Gradient background matching main page */
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, rgba(59, 130, 246, 0.25), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(236, 72, 153, 0.25), transparent 45%),
+        #050816;
+    }
+
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 9999px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* File input styling */
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
+      border: 1px solid rgba(99, 102, 241, 0.5);
+      border-radius: 8px;
+      color: rgba(199, 210, 254, 1);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .file-label:hover {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(168, 85, 247, 0.3));
+      border-color: rgba(99, 102, 241, 0.8);
+    }
+
+    .file-name {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-top: 4px;
+    }
+
+    /* ===== RESPONSIVE MEDIA QUERIES ===== */
+
+    /* Extra Small Devices: 320px - 480px (Mobile Phones) */
+    @media (max-width: 480px) {
+      body {
+        font-size: 14px;
+      }
+
+      header {
+        flex-wrap: wrap;
+        gap: 8px !important;
+        padding: 12px 12px !important;
+      }
+
+      header h1 {
+        font-size: 16px !important;
+      }
+
+      header p {
+        font-size: 11px !important;
+      }
+
+      main {
+        padding: 16px 12px !important;
+      }
+
+      h2 {
+        font-size: 22px !important;
+      }
+
+      h3 {
+        font-size: 18px !important;
+      }
+
+      input, textarea {
+        font-size: 16px !important;
+        padding: 10px 12px !important;
+      }
+
+      button {
+        font-size: 13px !important;
+        padding: 10px 12px !important;
+      }
+
+      .rounded-3xl {
+        border-radius: 16px !important;
+      }
+
+      .p-8 {
+        padding: 16px !important;
+      }
+
+      .space-y-6 > * + * {
+        margin-top: 16px !important;
+      }
+
+      .grid {
+        gap: 12px !important;
+      }
+
+      .grid-cols-1 {
+        grid-template-columns: 1fr !important;
+      }
+
+      .md\:grid-cols-2 {
+        grid-template-columns: 1fr !important;
+      }
+
+      .file-label {
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+      }
+
+      #songsList {
+        gap: 8px !important;
+      }
+
+      .flex {
+        flex-wrap: wrap !important;
+      }
+
+      .w-full {
+        width: 100% !important;
+      }
+    }
+
+    /* Small Devices: 481px - 640px (Small Tablets & Large Phones) */
+    @media (min-width: 481px) and (max-width: 640px) {
+      body {
+        font-size: 15px;
+      }
+
+      header {
+        padding: 14px 14px !important;
+        gap: 12px !important;
+      }
+
+      header h1 {
+        font-size: 18px !important;
+      }
+
+      main {
+        padding: 20px 14px !important;
+      }
+
+      h2 {
+        font-size: 24px !important;
+      }
+
+      h3 {
+        font-size: 20px !important;
+      }
+
+      input {
+        font-size: 15px !important;
+        padding: 12px 14px !important;
+      }
+
+      button {
+        font-size: 14px !important;
+        padding: 12px 14px !important;
+      }
+
+      .p-8 {
+        padding: 20px !important;
+      }
+
+      .space-y-6 > * + * {
+        margin-top: 18px !important;
+      }
+
+      .grid {
+        gap: 14px !important;
+      }
+
+      .md\:grid-cols-2 {
+        grid-template-columns: 1fr !important;
+      }
+
+      #songsList {
+        gap: 12px !important;
+      }
+    }
+
+    /* Medium Devices: 641px - 768px (Tablets) */
+    @media (min-width: 641px) and (max-width: 768px) {
+      header {
+        padding: 16px 18px !important;
+      }
+
+      header h1 {
+        font-size: 20px !important;
+      }
+
+      main {
+        padding: 24px 18px !important;
+      }
+
+      h2 {
+        font-size: 28px !important;
+      }
+
+      h3 {
+        font-size: 22px !important;
+      }
+
+      .p-8 {
+        padding: 24px !important;
+      }
+
+      .space-y-6 > * + * {
+        margin-top: 20px !important;
+      }
+
+      .grid {
+        gap: 16px !important;
+      }
+
+      .md\:grid-cols-2 {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+
+      #songsList {
+        gap: 12px !important;
+      }
+    }
+
+    /* Large Devices: 769px - 1024px (Small Laptops & Large Tablets) */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      main {
+        max-width: 100% !important;
+        padding: 28px 24px !important;
+      }
+
+      header {
+        padding: 18px 24px !important;
+      }
+
+      h2 {
+        font-size: 32px !important;
+      }
+
+      .p-8 {
+        padding: 28px !important;
+      }
+
+      .space-y-6 > * + * {
+        margin-top: 24px !important;
+      }
+
+      .grid {
+        gap: 18px !important;
+      }
+
+      .md\:grid-cols-2 {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+
+      #songsList {
+        gap: 12px !important;
+      }
+    }
+
+    /* XL Devices: 1025px+ (Desktops & Large Monitors) */
+    @media (min-width: 1025px) {
+      main {
+        padding: 40px 32px !important;
+      }
+
+      header {
+        padding: 20px 32px !important;
+      }
+
+      h1 {
+        font-size: 24px !important;
+      }
+
+      h2 {
+        font-size: 36px !important;
+      }
+
+      h3 {
+        font-size: 24px !important;
+      }
+
+      .p-8 {
+        padding: 32px !important;
+      }
+
+      .space-y-6 > * + * {
+        margin-top: 24px !important;
+      }
+
+      .grid {
+        gap: 20px !important;
+      }
+
+      .md\:grid-cols-2 {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+
+      #songsList {
+        gap: 16px !important;
+      }
+    }
+
+    /* Landscape Mode Adjustments */
+    @media (max-height: 600px) and (orientation: landscape) {
+      header {
+        padding: 8px 16px !important;
+      }
+
+      main {
+        padding: 12px 16px !important;
+      }
+
+      h1 {
+        font-size: 14px !important;
+      }
+
+      h2 {
+        font-size: 18px !important;
+      }
+
+      h3 {
+        font-size: 14px !important;
+      }
+
+      .p-8 {
+        padding: 12px !important;
+      }
+
+      input, button {
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+      }
+
+      .space-y-6 > * + * {
+        margin-top: 12px !important;
+      }
+    }
+
+    /* iPhone SE & Small Phones Optimization */
+    @media (max-width: 375px) {
+      header h1 {
+        font-size: 14px !important;
+      }
+
+      header p {
+        font-size: 10px !important;
+      }
+
+      h2 {
+        font-size: 20px !important;
+      }
+
+      h3 {
+        font-size: 16px !important;
+      }
+
+      main {
+        gap: 12px !important;
+      }
+
+      .p-8 {
+        padding: 12px !important;
+      }
+
+      .text-center {
+        padding: 12px !important;
+      }
+
+      #songsList .flex {
+        gap: 8px !important;
+      }
+    }
+
+    /* Folding Devices (Samsung Galaxy Fold) */
+    @media (max-width: 280px) {
+      body {
+        font-size: 12px;
+      }
+
+      header {
+        flex-direction: column;
+        gap: 4px !important;
+        padding: 8px !important;
+      }
+
+      header h1 {
+        font-size: 12px !important;
+      }
+
+      header p {
+        font-size: 9px !important;
+      }
+
+      main {
+        padding: 8px !important;
+      }
+
+      h2 {
+        font-size: 16px !important;
+      }
+
+      .p-8 {
+        padding: 8px !important;
+      }
+
+      input, button {
+        padding: 6px 8px !important;
+        font-size: 11px !important;
+      }
+    }
+
+    /* High DPI Devices (Retina/2x displays) */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+    }
+
+    /* Low Light Mode for Dark Devices */
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: radial-gradient(circle at top, rgba(59, 130, 246, 0.15), transparent 55%),
+          radial-gradient(circle at bottom right, rgba(236, 72, 153, 0.15), transparent 45%),
+          #030410;
+      }
+    }
+
+    /* Reduced Motion for Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Touch Device Optimization */
+    @media (hover: none) and (pointer: coarse) {
+      button {
+        padding: 14px 16px !important;
+        font-size: 16px !important;
+      }
+
+      input {
+        padding: 14px 16px !important;
+        font-size: 16px !important;
+      }
+
+      .file-label {
+        padding: 12px 16px !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="text-white antialiased">
+  <div class="relative min-h-screen flex flex-col">
+    <!-- Top decor -->
+    <div class="pointer-events-none absolute inset-0 overflow-hidden">
+      <div class="absolute -top-28 -left-28 h-96 w-96 rounded-full bg-gradient-to-br from-indigo-500/40 via-purple-500/30 to-transparent blur-3xl"></div>
+      <div class="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-gradient-to-br from-pink-500/30 via-rose-500/20 to-transparent blur-3xl"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="relative z-10 flex items-center justify-between gap-4 border-b border-white/10 bg-black/40 px-6 py-5 backdrop-blur">
+      <div class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 shadow-lg shadow-indigo-500/30">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-2v13" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19c0 1.105-.895 2-2 2s-2-.895-2-2 .895-2 2-2 2 .895 2 2z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 17c0 1.105-.895 2-2 2s-2-.895-2-2 .895-2 2-2 2 .895 2 2z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xl font-semibold tracking-tight">Next-Wave Music</h1>
+          <p class="text-xs text-white/60">Admin Control Center</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span id="adminName" class="hidden text-sm text-white/60">Logged in as Admin</span>
+        <button id="logoutBtn" onclick="logout()" class="hidden inline-flex items-center gap-2 rounded-full bg-red-500/20 px-4 py-2 text-sm font-medium text-red-200 hover:bg-red-500/30 transition">
+          Logout
+        </button>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="relative z-10 flex-1 mx-auto w-full max-w-4xl px-6 py-10">
+      
+      <!-- Login Form -->
+      <div id="loginSection" class="mb-8">
+        <div class="rounded-3xl bg-white/5 p-8 shadow-xl shadow-black/20 ring-1 ring-white/10 backdrop-blur max-w-md mx-auto">
+          <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold mb-2">Admin Login</h2>
+            <p class="text-white/60">Access the Next-Wave Music admin panel</p>
+          </div>
+
+          <form id="loginForm" class="space-y-6">
+            <div>
+              <label class="block text-sm font-medium mb-2">Username</label>
+              <input 
+                type="text" 
+                id="username" 
+                placeholder="Enter admin username" 
+                class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 transition"
+                required
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-2">Password</label>
+              <input 
+                type="password" 
+                id="password" 
+                placeholder="Enter admin password" 
+                class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 transition"
+                required
+              />
+            </div>
+
+            <div id="loginError" class="hidden p-3 rounded-lg bg-red-500/20 border border-red-500/50 text-red-200 text-sm"></div>
+
+            <button 
+              type="submit" 
+              class="w-full px-6 py-3 rounded-lg bg-gradient-to-r from-indigo-500 to-fuchsia-500 font-medium text-white hover:shadow-lg hover:shadow-indigo-500/30 transition duration-200"
+            >
+              Sign In
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Upload Section (Hidden until login) -->
+      <div id="uploadSection" class="hidden">
+        <div class="rounded-3xl bg-white/5 p-8 shadow-xl shadow-black/20 ring-1 ring-white/10 backdrop-blur">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold mb-2">Upload New Song</h2>
+            <p class="text-white/60">Add a new track to Next-Wave Music</p>
+          </div>
+
+          <form id="form" enctype="multipart/form-data" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium mb-2">Artist Name</label>
+                <input 
+                  type="text"
+                  name="artist" 
+                  placeholder="e.g., The Weeknd" 
+                  class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 transition"
+                  required
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-2">Song Title</label>
+                <input 
+                  type="text"
+                  name="title" 
+                  placeholder="e.g., Blinding Lights" 
+                  class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 transition"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium mb-3">Cover Image</label>
+                <div class="relative">
+                  <input 
+                    type="file" 
+                    id="coverInput"
+                    name="cover" 
+                    accept="image/*"
+                    class="file-input"
+                    required
+                  />
+                  <label for="coverInput" class="file-label">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Choose cover image
+                  </label>
+                  <div id="coverName" class="file-name"></div>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-3">Audio File</label>
+                <div class="relative">
+                  <input 
+                    type="file" 
+                    id="audioInput"
+                    name="audio" 
+                    accept="audio/*"
+                    class="file-input"
+                    required
+                  />
+                  <label for="audioInput" class="file-label">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Choose audio file
+                  </label>
+                  <div id="audioName" class="file-name"></div>
+                </div>
+              </div>
+            </div>
+
+            <div id="uploadError" class="hidden p-3 rounded-lg bg-red-500/20 border border-red-500/50 text-red-200 text-sm"></div>
+            <div id="uploadSuccess" class="hidden p-3 rounded-lg bg-green-500/20 border border-green-500/50 text-green-200 text-sm"></div>
+
+            <div class="flex gap-4 pt-4">
+              <button 
+                type="submit" 
+                class="flex-1 px-6 py-3 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 font-medium text-white hover:shadow-lg hover:shadow-emerald-500/30 transition duration-200"
+              >
+                Upload Song
+              </button>
+              <button 
+                type="button" 
+                onclick="logout()"
+                class="px-6 py-3 rounded-lg bg-white/10 font-medium text-white hover:bg-white/15 transition duration-200"
+              >
+                Logout
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Delete Songs Section -->
+        <div class="mt-10 rounded-3xl bg-white/5 p-8 shadow-xl shadow-black/20 ring-1 ring-white/10 backdrop-blur">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold mb-2">Manage Songs</h2>
+            <p class="text-white/60">View and delete songs from the platform</p>
+          </div>
+
+          <div id="songsList" class="grid gap-4">
+            <div class="text-center py-8 text-white/60">Loading songs...</div>
+          </div>
+        </div>
+
+        <!-- API Music Import Manager Section -->
+        <div class="mt-10 rounded-3xl bg-white/5 p-8 shadow-xl shadow-black/20 ring-1 ring-white/10 backdrop-blur">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold mb-2">🎵 API Music Import Manager</h2>
+            <p class="text-white/60">Automatically import music from Audius, Jamendo, YouTube, and Spotify</p>
+          </div>
+
+          <!-- Statistics Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="bg-white/5 rounded-lg p-6 border border-white/10">
+              <p class="text-white/60 text-sm mb-2">Total Songs Imported</p>
+              <p id="totalImportedSongs" class="text-3xl font-bold text-indigo-400">0</p>
+            </div>
+            <div class="bg-white/5 rounded-lg p-6 border border-white/10">
+              <p class="text-white/60 text-sm mb-2">Total Plays</p>
+              <p id="totalPlays" class="text-3xl font-bold text-purple-400">0</p>
+            </div>
+            <div class="bg-white/5 rounded-lg p-6 border border-white/10">
+              <p class="text-white/60 text-sm mb-2">Last Import</p>
+              <p id="lastImportTime" class="text-lg font-semibold text-emerald-400">Never</p>
+            </div>
+          </div>
+
+          <!-- Source Breakdown -->
+          <div class="bg-white/5 rounded-lg p-6 border border-white/10 mb-8">
+            <h3 class="text-lg font-semibold mb-4">Songs by Source</h3>
+            <div id="sourceStats" class="space-y-3">
+              <div class="text-white/60 text-sm">Loading...</div>
+            </div>
+          </div>
+
+          <!-- Import Controls -->
+          <div class="space-y-6">
+            <div>
+              <h3 class="text-lg font-semibold mb-4">Import Controls</h3>
+              <div class="flex flex-wrap gap-4">
+                <button id="triggerImportBtn" onclick="triggerManualImport()" class="px-6 py-3 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 font-medium text-white hover:shadow-lg hover:shadow-indigo-500/30 transition">
+                  ▶️ Trigger Manual Import
+                </button>
+                <button id="refreshStatsBtn" onclick="refreshImportStats()" class="px-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 font-medium text-white hover:shadow-lg hover:shadow-cyan-500/30 transition">
+                  🔄 Refresh Statistics
+                </button>
+              </div>
+            </div>
+
+            <div id="importStatusDiv" class="hidden p-6 bg-white/5 rounded-lg border border-white/10">
+              <p class="text-white/60 text-sm mb-2">Import Status</p>
+              <p id="importStatus" class="text-white">Checking scheduler status...</p>
+            </div>
+
+            <!-- Scheduler Status -->
+            <div class="bg-white/5 rounded-lg p-6 border border-white/10">
+              <h3 class="text-lg font-semibold mb-4">Scheduler Status</h3>
+              <div id="schedulerStatus" class="space-y-2 text-white/80">
+                <p>Status: <span id="schedulerRunning" class="text-emerald-400 font-semibold">Checking...</span></p>
+                <p>Next Import: <span id="nextImportTime" class="text-blue-400">In 24 hours</span></p>
+                <p class="text-sm text-white/60 mt-4">The scheduler automatically imports new songs every 24 hours from Audius, Jamendo, YouTube, and Spotify (if API keys/credentials are configured).</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Advert Manager Section -->
+        <div class="mt-10 rounded-3xl bg-white/5 p-8 shadow-xl shadow-black/20 ring-1 ring-white/10 backdrop-blur">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold mb-2">Advert Manager</h2>
+            <p class="text-white/60">Create and manage pop-out advertisements</p>
+          </div>
+
+          <!-- Add New Advert Form -->
+          <form id="advertForm" enctype="multipart/form-data" class="space-y-6 mb-8 p-6 bg-white/5 rounded-lg border border-white/10">
+            <h3 class="text-xl font-semibold">Create New Advert</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium mb-2">Advert Title</label>
+                <input 
+                  type="text"
+                  id="advertTitle" 
+                  placeholder="e.g., Premium Membership" 
+                  class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 transition"
+                  required
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-2">Advert Link</label>
+                <input 
+                  type="url"
+                  id="advertLink" 
+                  placeholder="https://example.com" 
+                  class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 transition"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-2">Description</label>
+              <textarea 
+                id="advertDescription"
+                placeholder="Brief description of the advert..." 
+                rows="3"
+                class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 transition"
+              ></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-medium mb-2">Advert Type</label>
+                <select 
+                  id="advertType"
+                  class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 transition"
+                  onchange="toggleAdvertMediaInput()"
+                  required
+                >
+                  <option value="image">Image Advert</option>
+                  <option value="video">Video Advert</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-2">Duration (Seconds)</label>
+                <input 
+                  type="number"
+                  id="advertDuration"
+                  min="3"
+                  max="30"
+                  value="5"
+                  placeholder="How long to show advert" 
+                  class="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/40 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 transition"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Image Input (shown by default) -->
+            <div id="imageInputContainer">
+              <label class="block text-sm font-medium mb-3">Advert Image</label>
+              <div class="relative">
+                <input 
+                  type="file" 
+                  id="advertImageInput"
+                  accept="image/*"
+                  class="file-input"
+                  required
+                />
+                <label for="advertImageInput" class="file-label">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Choose image
+                </label>
+                <div id="advertImageName" class="file-name"></div>
+              </div>
+            </div>
+
+            <!-- Video Input (hidden by default) -->
+            <div id="videoInputContainer" class="hidden">
+              <label class="block text-sm font-medium mb-3">Advert Video</label>
+              <div class="relative">
+                <input 
+                  type="file" 
+                  id="advertVideoInput"
+                  accept="video/*"
+                  class="file-input"
+                />
+                <label for="advertVideoInput" class="file-label">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Choose video
+                </label>
+                <div id="advertVideoName" class="file-name"></div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <input 
+                type="checkbox" 
+                id="advertEnabled"
+                checked
+                class="w-4 h-4 rounded bg-white/10 border border-white/20 cursor-pointer accent-indigo-500"
+              />
+              <label for="advertEnabled" class="text-sm font-medium cursor-pointer">Enable this advert</label>
+            </div>
+
+            <div id="advertFormError" class="hidden p-3 rounded-lg bg-red-500/20 border border-red-500/50 text-red-200 text-sm"></div>
+            <div id="advertFormSuccess" class="hidden p-3 rounded-lg bg-green-500/20 border border-green-500/50 text-green-200 text-sm"></div>
+
+            <button 
+              type="submit" 
+              class="w-full px-6 py-3 rounded-lg bg-gradient-to-r from-violet-500 to-indigo-500 font-medium text-white hover:shadow-lg hover:shadow-indigo-500/30 transition duration-200"
+            >
+              Create Advert
+            </button>
+          </form>
+
+          <!-- Adverts List -->
+          <div class="mt-8">
+            <h3 class="text-xl font-semibold mb-4">Active Adverts</h3>
+            <div id="advertsList" class="grid gap-4">
+              <div class="text-center py-8 text-white/60">Loading adverts...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Simple authentication (for demo purposes)
+    const ADMIN_USERNAME = "danielxam2004@gmail.com";
+    const ADMIN_PASSWORD = "Authodesk2004";
+
+    // Check if already logged in
+    function checkLogin() {
+      const isLoggedIn = localStorage.getItem("adminLoggedIn") === "true";
+      if (isLoggedIn) {
+        showUploadSection();
+      }
+    }
+
+    // Handle login
+    document.getElementById("loginForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      const loginError = document.getElementById("loginError");
+
+      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+        localStorage.setItem("adminLoggedIn", "true");
+        loginError.classList.add("hidden");
+        showUploadSection();
+      } else {
+        loginError.textContent = "Invalid username or password";
+        loginError.classList.remove("hidden");
+      }
+    });
+
+    // File input handlers
+    function logout() {
+      localStorage.removeItem("adminLoggedIn");
+      document.getElementById("loginSection").classList.remove("hidden");
+      document.getElementById("uploadSection").classList.add("hidden");
+      document.getElementById("adminName").classList.add("hidden");
+      document.getElementById("logoutBtn").classList.add("hidden");
+      document.getElementById("loginForm").reset();
+    }
+
+    // File input handlers
+    document.getElementById("coverInput").addEventListener("change", function() {
+      document.getElementById("coverName").textContent = this.files[0]?.name || "";
+    });
+
+    document.getElementById("audioInput").addEventListener("change", function() {
+      document.getElementById("audioName").textContent = this.files[0]?.name || "";
+    });
+
+    document.getElementById("advertImageInput").addEventListener("change", function() {
+      document.getElementById("advertImageName").textContent = this.files[0]?.name || "";
+    });
+
+    // Handle form submission
+    document.getElementById("form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const uploadError = document.getElementById("uploadError");
+      const uploadSuccess = document.getElementById("uploadSuccess");
+
+      try {
+        const res = await fetch("/upload", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          uploadSuccess.textContent = data.message;
+          uploadSuccess.classList.remove("hidden");
+          uploadError.classList.add("hidden");
+          this.reset();
+          document.getElementById("coverName").textContent = "";
+          document.getElementById("audioName").textContent = "";
+          loadSongsList();
+          setTimeout(() => uploadSuccess.classList.add("hidden"), 3000);
+        } else {
+          uploadError.textContent = data.message || "Upload failed";
+          uploadError.classList.remove("hidden");
+          uploadSuccess.classList.add("hidden");
+        }
+      } catch (error) {
+        uploadError.textContent = "Error uploading song: " + error.message;
+        uploadError.classList.remove("hidden");
+        uploadSuccess.classList.add("hidden");
+      }
+    });
+
+    // Handle advert form submission
+    document.getElementById("advertForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const advertFormError = document.getElementById("advertFormError");
+      const advertFormSuccess = document.getElementById("advertFormSuccess");
+      const advertType = document.getElementById("advertType").value;
+
+      // Add form fields to FormData
+      formData.append("title", document.getElementById("advertTitle").value);
+      formData.append("link", document.getElementById("advertLink").value);
+      formData.append("description", document.getElementById("advertDescription").value);
+      formData.append("duration", document.getElementById("advertDuration").value);
+      formData.append("enabled", document.getElementById("advertEnabled").checked);
+      formData.append("type", advertType);
+      
+      if (advertType === "image") {
+        formData.append("image", document.getElementById("advertImageInput").files[0]);
+      } else {
+        formData.append("video", document.getElementById("advertVideoInput").files[0]);
+      }
+
+      try {
+        const res = await fetch("/advert/create", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          advertFormSuccess.textContent = "Advert created successfully!";
+          advertFormSuccess.classList.remove("hidden");
+          advertFormError.classList.add("hidden");
+          this.reset();
+          document.getElementById("advertImageName").textContent = "";
+          document.getElementById("advertVideoName").textContent = "";
+          loadAdvertsList();
+          setTimeout(() => advertFormSuccess.classList.add("hidden"), 3000);
+        } else {
+          advertFormError.textContent = data.message || "Failed to create advert";
+          advertFormError.classList.remove("hidden");
+          advertFormSuccess.classList.add("hidden");
+        }
+      } catch (error) {
+        advertFormError.textContent = "Error creating advert: " + error.message;
+        advertFormError.classList.remove("hidden");
+        advertFormSuccess.classList.add("hidden");
+      }
+    });
+
+    // Toggle between image and video input
+    function toggleAdvertMediaInput() {
+      const type = document.getElementById("advertType").value;
+      const imageContainer = document.getElementById("imageInputContainer");
+      const videoContainer = document.getElementById("videoInputContainer");
+      const imageInput = document.getElementById("advertImageInput");
+      const videoInput = document.getElementById("advertVideoInput");
+
+      if (type === "image") {
+        imageContainer.classList.remove("hidden");
+        videoContainer.classList.add("hidden");
+        imageInput.required = true;
+        videoInput.required = false;
+      } else {
+        imageContainer.classList.add("hidden");
+        videoContainer.classList.remove("hidden");
+        imageInput.required = false;
+        videoInput.required = true;
+      }
+    }
+
+    // File input display names
+    document.getElementById("advertImageInput").addEventListener("change", function() {
+      document.getElementById("advertImageName").textContent = this.files[0]?.name || "";
+    });
+    document.getElementById("advertVideoInput").addEventListener("change", function() {
+      document.getElementById("advertVideoName").textContent = this.files[0]?.name || "";
+    });
+
+    // Load songs list
+    async function loadSongsList() {
+      try {
+        const res = await fetch("/songs");
+        const songs = await res.json();
+        const songsList = document.getElementById("songsList");
+
+        if (songs.length === 0) {
+          songsList.innerHTML = '<div class="text-center py-8 text-white/60">No songs found</div>';
+          return;
+        }
+
+        songsList.innerHTML = songs.map((song) => `
+          <div class="flex items-center justify-between gap-4 p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition">
+            <div class="flex items-center gap-4 flex-1 min-w-0">
+              <img src="${song.cover}" alt="${song.title}" class="h-16 w-16 rounded-lg object-cover flex-none" />
+              <div class="min-w-0">
+                <h4 class="font-semibold text-white truncate">${song.title}</h4>
+                <p class="text-sm text-white/60 truncate">${song.artist}</p>
+              </div>
+            </div>
+            <button 
+              onclick="deleteSong(${song.id})"
+              class="flex-none px-4 py-2 rounded-lg bg-red-500/20 text-red-200 hover:bg-red-500/30 transition font-medium text-sm"
+            >
+              Delete
+            </button>
+          </div>
+        `).join("");
+      } catch (error) {
+        console.error("Error loading songs:", error);
+      }
+    }
+
+    // Load adverts list
+    async function loadAdvertsList() {
+      try {
+        const res = await fetch("/adverts");
+        const adverts = await res.json();
+        const advertsList = document.getElementById("advertsList");
+
+        if (!adverts || adverts.length === 0) {
+          advertsList.innerHTML = '<div class="text-center py-8 text-white/60">No adverts created yet</div>';
+          return;
+        }
+
+        advertsList.innerHTML = adverts.map((advert) => `
+          <div class="p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition">
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <h4 class="font-semibold text-white">${advert.title}</h4>
+                  <span class="text-xs px-2 py-1 rounded-full ${advert.enabled ? 'bg-green-500/20 text-green-200' : 'bg-gray-500/20 text-gray-200'}">
+                    ${advert.enabled ? 'Enabled' : 'Disabled'}
+                  </span>
+                </div>
+                <p class="text-sm text-white/60 mb-2">${advert.description || 'No description'}</p>
+                <p class="text-xs text-white/40">Duration: ${advert.duration}s</p>
+              </div>
+              <div class="flex gap-2">
+                <button 
+                  onclick="toggleAdvert(${advert.id})"
+                  class="px-3 py-2 rounded-lg text-sm font-medium transition ${advert.enabled ? 'bg-yellow-500/20 text-yellow-200 hover:bg-yellow-500/30' : 'bg-green-500/20 text-green-200 hover:bg-green-500/30'}"
+                >
+                  ${advert.enabled ? 'Disable' : 'Enable'}
+                </button>
+                <button 
+                  onclick="deleteAdvert(${advert.id})"
+                  class="flex-none px-3 py-2 rounded-lg bg-red-500/20 text-red-200 hover:bg-red-500/30 transition font-medium text-sm"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        `).join("");
+      } catch (error) {
+        console.error("Error loading adverts:", error);
+      }
+    }
+
+    // Delete song
+    async function deleteSong(songId) {
+      if (!confirm("Are you sure you want to delete this song?")) return;
+
+      try {
+        console.log("Deleting song with ID:", songId);
+        const res = await fetch(`/delete/${songId}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+
+        console.log("Response status:", res.status);
+        const data = await res.json();
+        console.log("Response data:", data);
+
+        if (res.ok) {
+          alert(data.message);
+          loadSongsList();
+        } else {
+          alert("Error: " + (data.message || "Failed to delete song"));
+        }
+      } catch (error) {
+        console.error("Delete error:", error);
+        alert("Error deleting song: " + error.message);
+      }
+    }
+
+    // Toggle advert
+    async function toggleAdvert(advertId) {
+      try {
+        const res = await fetch(`/advert/toggle/${advertId}`, { method: "POST" });
+        if (res.ok) {
+          loadAdvertsList();
+        } else {
+          alert("Error toggling advert");
+        }
+      } catch (error) {
+        console.error("Error toggling advert:", error);
+      }
+    }
+
+    // Delete advert
+    async function deleteAdvert(advertId) {
+      if (!confirm("Are you sure you want to delete this advert?")) return;
+
+      try {
+        const res = await fetch(`/advert/delete/${advertId}`, { method: "DELETE" });
+        if (res.ok) {
+          loadAdvertsList();
+        } else {
+          alert("Error deleting advert");
+        }
+      } catch (error) {
+        console.error("Error deleting advert:", error);
+      }
+    }
+
+    // Show upload section and load songs
+    function showUploadSection() {
+      document.getElementById("loginSection").classList.add("hidden");
+      document.getElementById("uploadSection").classList.remove("hidden");
+      document.getElementById("adminName").classList.remove("hidden");
+      document.getElementById("logoutBtn").classList.remove("hidden");
+      loadSongsList();
+      loadAdvertsList();
+      refreshImportStats();
+      // Refresh stats every 30 seconds
+      setInterval(refreshImportStats, 30000);
+    }
+
+    // ============================================
+    // API IMPORT MANAGER FUNCTIONS
+    // ============================================
+
+    async function refreshImportStats() {
+      try {
+        // Fetch stats
+        const statsRes = await fetch('/admin/import/stats');
+        const stats = await statsRes.json();
+        
+        // Update total songs
+        document.getElementById('totalImportedSongs').textContent = stats.total_songs || 0;
+        document.getElementById('totalPlays').textContent = (stats.total_plays || 0).toLocaleString();
+        
+        // Update source breakdown
+        const sourceHtml = (stats.by_source || []).map(s => `
+          <div class="flex justify-between items-center p-3 bg-white/5 rounded border border-white/10">
+            <span class="capitalize font-medium">${s.source}</span>
+            <span class="text-indigo-400 font-bold">${s.count} songs</span>
+          </div>
+        `).join('');
+        
+        document.getElementById('sourceStats').innerHTML = sourceHtml || '<p class="text-white/60">No songs imported yet</p>';
+        
+        // Fetch scheduler status
+        const statusRes = await fetch('/admin/import/status');
+        const status = statusRes.ok ? await statusRes.json() : {};
+        
+        // Update scheduler status
+        const isRunning = status.isRunning || false;
+        document.getElementById('schedulerRunning').textContent = isRunning ? '✓ Active' : '⚠ Inactive';
+        document.getElementById('schedulerRunning').className = isRunning ? 'text-emerald-400 font-semibold' : 'text-yellow-400 font-semibold';
+        
+        // Update last import time
+        if (status.lastImportTime) {
+          const lastTime = new Date(status.lastImportTime);
+          document.getElementById('lastImportTime').textContent = lastTime.toLocaleString();
+        }
+      } catch (error) {
+        console.error('Error refreshing import stats:', error);
+      }
+    }
+
+    async function triggerManualImport() {
+      const btn = document.getElementById('triggerImportBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Importing...';
+      
+      try {
+        const res = await fetch('/admin/import/trigger', { 
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            limit: 100
+          })
+        });
+        const data = await res.json();
+        
+        document.getElementById('importStatusDiv').classList.remove('hidden');
+        
+        // Check if import was successful
+        if (data.success || data.stats) {
+          document.getElementById('importStatus').innerHTML = `
+            <div class="text-emerald-400">
+              ✓ Import triggered successfully!<br>
+              <span class="text-white/80 text-sm">
+                ${data.stats ? `Added: ${data.stats.added} songs, Duplicates: ${data.stats.duplicates}, Failed: ${data.stats.failed}` : 'Songs are being imported in the background.'}
+              </span>
+            </div>
+          `;
+          document.getElementById('importStatus').style.color = '#4ade80';
+        } else {
+          document.getElementById('importStatus').textContent = data.message || data.error || 'Import triggered successfully!';
+          document.getElementById('importStatus').style.color = '#4ade80';
+        }
+        
+        // Refresh stats after a delay
+        setTimeout(refreshImportStats, 3000);
+      } catch (error) {
+        document.getElementById('importStatusDiv').classList.remove('hidden');
+        document.getElementById('importStatus').textContent = 'Error: ' + error.message;
+        document.getElementById('importStatus').style.color = '#f87171';
+        console.error('Manual import error:', error);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '▶️ Trigger Manual Import';
+      }
+    }
+
+    // Check login on page load
+    checkLogin();
+  </script>

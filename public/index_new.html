@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Next-Wave Music</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* Modern Dark Theme Background */
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, rgba(59, 130, 246, 0.25), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(236, 72, 153, 0.25), transparent 45%),
+        #050816;
+      scroll-behavior: smooth;
+    }
+
+    /* Custom scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(99, 102, 241, 0.4);
+      border-radius: 9999px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(99, 102, 241, 0.6);
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Download button animation */
+    .download-btn {
+      transition: all 0.3s ease;
+    }
+
+    .download-btn:hover {
+      transform: scale(1.1);
+    }
+
+    /* Smooth card hover animations */
+    .song-card {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .song-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+    }
+
+    /* Sidebar active state */
+    .sidebar-item.active {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(168, 85, 247, 0.2));
+      border-left: 3px solid rgba(99, 102, 241, 1);
+      padding-left: calc(1rem - 3px);
+    }
+
+    /* Waveform animation for music bars */
+    @keyframes waveform {
+      0%, 100% { height: 4px; }
+      50% { height: 16px; }
+    }
+
+    .waveform-bar {
+      animation: waveform 0.6s ease-in-out infinite;
+    }
+
+    .waveform-bar:nth-child(1) { animation-delay: 0s; }
+    .waveform-bar:nth-child(2) { animation-delay: 0.1s; }
+    .waveform-bar:nth-child(3) { animation-delay: 0.2s; }
+    .waveform-bar:nth-child(4) { animation-delay: 0.3s; }
+
+    /* Mobile sidebar */
+    .sidebar {
+      transition: left 0.3s ease;
+    }
+
+    /* Sidebar backdrop */
+    .sidebar-backdrop {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      /* On mobile, flex container needs adjustment */
+      .flex.h-screen {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        width: 70%;
+        height: 100vh;
+        z-index: 40;
+        overflow-y-auto;
+      }
+
+      .sidebar.active {
+        left: 0;
+      }
+
+      .sidebar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        z-index: 30;
+      }
+
+      .sidebar.active ~ .sidebar-backdrop {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      main {
+        width: 100%;
+        flex: 1;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="text-white antialiased">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar w-64 overflow-y-auto border-r border-white/10 bg-black/40 p-6 backdrop-blur max-md:w-72">
+      <!-- Logo -->
+      <div class="mb-8 flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-fuchsia-500 shadow-lg shadow-indigo-500/30">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-2v13" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19c0 1.105-.895 2-2 2s-2-.895-2-2 .895-2 2-2 2 .895 2 2z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 17c0 1.105-.895 2-2 2s-2-.895-2-2 .895-2 2-2 2 .895 2 2z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-semibold">Next-Wave</h1>
+          <p class="text-xs text-white/60">Music</p>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="space-y-2">
+        <a href="#" onclick="loadSongs(); document.querySelector('.sidebar').classList.remove('active'); return false" class="sidebar-item active flex items-center gap-3 rounded-lg px-4 py-3 text-white/80 transition hover:text-white hover:bg-white/10">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M10.5 19.5H3.75A2.25 2.25 0 011.5 17.25V4.5a2.25 2.25 0 012.25-2.25h10.5A2.25 2.25 0 0116.5 4.5v7.5M13.5 1.5v7.5M7.5 5.25h3m-3 3h3m-3 3h3M22.5 19.5v-3m0 0l-2.5-2.5m2.5 2.5l2.5-2.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          </svg>
+          <span class="font-medium">Home</span>
+        </a>
+
+        <a href="#" onclick="loadTrending(); document.querySelector('.sidebar').classList.remove('active'); return false" class="sidebar-item flex items-center gap-3 rounded-lg px-4 py-3 text-white/60 transition hover:text-white hover:bg-white/10">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            <path d="M13 2v7h7" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            <path d="M9 13h6m-6 3h4" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          <span>Trending</span>
+        </a>
+
+        <a href="#" class="sidebar-item flex items-center gap-3 rounded-lg px-4 py-3 text-white/60 transition hover:text-white hover:bg-white/10">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          </svg>
+          <span>Library</span>
+        </a>
+
+        <a href="admin.html" class="sidebar-item flex items-center gap-3 rounded-lg px-4 py-3 text-white/60 transition hover:text-white hover:bg-white/10">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" fill="currentColor"/>
+          </svg>
+          <span>Admin</span>
+        </a>
+      </nav>
+
+      <!-- Search section in sidebar -->
+      <div class="mt-8 border-t border-white/10 pt-8">
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 18.5a7.5 7.5 0 006.15-3.85z" />
+            </svg>
+          </span>
+          <input id="search" class="w-full rounded-lg bg-white/10 py-2 pl-10 pr-4 text-sm text-white outline-none ring-1 ring-white/10 transition focus:ring-2 focus:ring-indigo-400" placeholder="Search songs..." />
+        </div>
+      </div>
+    </aside>
+
+    <!-- Sidebar backdrop for mobile -->
+    <div class="sidebar-backdrop md:hidden" onclick="document.querySelector('.sidebar').classList.remove('active')"></div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto pb-24">
+      <!-- Header with mobile menu toggle -->
+      <header class="sticky top-0 z-10 border-b border-white/10 bg-black/40 px-6 py-5 backdrop-blur">
+        <div class="flex items-center justify-between">
+          <button id="menuToggle" onclick="document.querySelector('.sidebar').classList.toggle('active')" class="md:hidden rounded-lg bg-white/10 p-2 text-white hover:bg-white/15 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+          </button>
+          <h1 class="text-2xl font-bold">Your Library</h1>
+          <div class="w-10"></div>
+        </div>
+      </header>
+
+      <!-- Content section -->
+      <div class="px-6 py-8">
+        <!-- Song count -->
+        <div class="mb-6 flex items-center justify-between">
+          <div>
+            <h2 class="text-3xl font-bold">All Songs</h2>
+            <p class="mt-1 text-sm text-white/60"><span id="songCount">0</span> songs available</p>
+          </div>
+          <div class="flex gap-3">
+            <button onclick="loadSongs()" class="rounded-full bg-white/10 px-6 py-2 text-sm font-medium text-white transition hover:bg-white/15">
+              Reset
+            </button>
+            <button onclick="loadTrending()" class="rounded-full bg-indigo-500/20 px-6 py-2 text-sm font-medium text-indigo-200 transition hover:bg-indigo-500/30">
+              Trending
+            </button>
+          </div>
+        </div>
+
+        <!-- Songs Grid -->
+        <div id="songs" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Bottom Music Player Bar -->
+  <div id="playerBar" class="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-black/80 px-6 py-3 backdrop-blur">
+    <div class="mx-auto max-w-full">
+      <!-- Progress bar -->
+      <div class="mb-4 h-1 w-full overflow-hidden rounded-full bg-white/10">
+        <div id="playerBarProgress" class="h-full w-0 bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-400"></div>
+      </div>
+
+      <!-- Player content -->
+      <div class="flex items-center justify-between gap-4">
+        <!-- Album art and info -->
+        <div class="flex flex-1 items-center gap-4 min-w-0">
+          <img id="playerBarCover" class="h-14 w-14 flex-none rounded-lg bg-white/10 object-cover" src="" alt="Cover" />
+          <div class="min-w-0">
+            <p id="playerBarTitle" class="truncate text-sm font-semibold">No song playing</p>
+            <p id="playerBarArtist" class="truncate text-xs text-white/60">Select a track</p>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex flex-none items-center gap-4">
+          <div class="hidden sm:flex items-center gap-2 text-xs text-white/60">
+            <span id="playerBarTime">0:00</span>
+            <span>/</span>
+            <span id="playerBarDuration">0:00</span>
+          </div>
+          <button id="playerBarPlayBtn" class="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500 text-white hover:bg-indigo-600 transition">
+            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Advert Modal -->
+  <div id="advertModal" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div class="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-gradient-to-b from-white/10 to-white/5 p-6 shadow-2xl ring-1 ring-white/20">
+      <!-- Close button -->
+      <button id="advertClose" class="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 transition">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+
+      <!-- Advert content -->
+      <img id="advertImage" class="mb-4 h-48 w-full rounded-xl object-cover" src="" alt="Advertisement" />
+      <h3 id="advertTitle" class="mb-2 text-xl font-bold text-white"></h3>
+      <p id="advertDescription" class="mb-6 text-sm text-white/80"></p>
+
+      <!-- Action button -->
+      <a id="advertLink" href="#" target="_blank" rel="noopener noreferrer" class="block w-full rounded-lg bg-gradient-to-r from-indigo-500 to-fuchsia-500 px-6 py-3 text-center font-semibold text-white transition hover:shadow-lg hover:shadow-indigo-500/30">
+        Visit Link
+      </a>
+    </div>
+  </div>
+
+  <!-- Audio element -->
+  <audio id="audio"></audio>
+
+  <script src="app.js"></script>
+  <script>
+    // Mobile menu toggle functionality
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarBackdrop = document.querySelector('.sidebar-backdrop');
+    const menuToggle = document.getElementById('menuToggle');
+    
+    // Close sidebar when clicking on backdrop
+    if (sidebarBackdrop) {
+      sidebarBackdrop.addEventListener('click', function() {
+        sidebar.classList.remove('active');
+      });
+    }
+
+    // Close sidebar when clicking on navigation links
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+      item.addEventListener('click', function() {
+        if (window.innerWidth <= 768) {
+          sidebar.classList.remove('active');
+        }
+      });
+    });
+
+    // Handle window resize - close sidebar on larger screens
+    window.addEventListener('resize', function() {
+      if (window.innerWidth > 768) {
+        sidebar.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+</html>
