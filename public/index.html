@@ -1085,17 +1085,53 @@
               Trending
             </button>
             <div class="flex items-center gap-2">
-       Professional Bottom Music Player Bar -->
-  <div id="playerBar" class="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-gradient-to-r from-black/95 via-gray-900/95 to-black/95 px-8 py-6 backdrop-blur-xl slide-up">
+              <button onclick="toggleArtistModal(true)" class="btn-secondary px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-300">
+                View Artists
+              </button>
+              <button onclick="openContactModal()" class="btn-secondary px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-300">
+                Contact Support
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <section class="space-y-6">
+          <div class="grid gap-6 lg:grid-cols-[1fr_280px]">
+            <div class="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/20">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+                <div>
+                  <h3 class="text-xl font-semibold text-white">All Songs</h3>
+                  <p class="text-sm text-white/60">Browse your full music library below.</p>
+                </div>
+                <div class="flex items-center gap-3 text-sm text-white/60">
+                  <button id="prevPage" class="btn-secondary px-4 py-2 rounded-xl">Prev</button>
+                  <span id="pageNumber">1</span>
+                  <button id="nextPage" class="btn-secondary px-4 py-2 rounded-xl">Next</button>
+                </div>
+              </div>
+              <div id="songs" class="space-y-4"></div>
+            </div>
+
+            <aside class="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/20">
+              <h3 class="text-xl font-semibold text-white mb-4">Recently Played</h3>
+              <div id="recentlyPlayed" class="space-y-3">
+                <p class="text-sm text-white/60">Play some songs to see your recent history.</p>
+              </div>
+            </aside>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Bottom Music Player Bar -->
+  <div id="playerBar" class="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-gradient-to-r from-black/95 via-gray-900/95 to-black/95 px-8 py-6 backdrop-blur-xl">
     <div class="mx-auto max-w-full">
-      <!-- Progress bar -->
       <div class="progress-container mb-6 h-2 w-full cursor-pointer rounded-full bg-white/10 overflow-hidden">
         <div id="playerBarProgress" class="progress-bar h-full rounded-full transition-all duration-100 ease-out"></div>
       </div>
 
-      <!-- Player content -->
       <div class="flex items-center justify-between gap-8">
-        <!-- Album art and info -->
         <div class="flex flex-1 items-center gap-6 min-w-0">
           <img id="playerBarCover" class="h-16 w-16 flex-none rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 object-cover shadow-2xl shadow-black/50 border-2 border-white/10" src="" alt="Cover" />
           <div class="min-w-0 flex-1">
@@ -1108,7 +1144,6 @@
           </div>
         </div>
 
-        <!-- Controls -->
         <div class="flex flex-none items-center gap-6">
           <div class="hidden lg:flex items-center gap-3 text-sm text-white/70 font-medium">
             <span id="playerBarTime">0:00</span>
@@ -1116,40 +1151,33 @@
             <span id="playerBarDuration">0:00</span>
           </div>
           <div class="flex items-center gap-4">
-            <!-- Previous -->
             <button id="playerBarPrevBtn" class="btn-secondary p-3 rounded-xl hover:scale-105 transition-all duration-200" title="Previous">
               <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
               </svg>
             </button>
-
-            <!-- Play/Pause -->
             <button id="playerBarPlayBtn" class="btn-primary p-4 rounded-2xl hover:scale-105 transition-all duration-200 shadow-2xl shadow-indigo-500/30">
               <svg class="h-7 w-7" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z"/>
               </svg>
             </button>
-
-            <!-- Next -->
             <button id="playerBarNextBtn" class="btn-secondary p-3 rounded-xl hover:scale-105 transition-all duration-200" title="Next">
               <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
               </svg>
             </button>
           </div>
-
-          <!-- Volume Control -->
           <div class="hidden md:flex items-center gap-3">
-            <button id="volumeBtn" class="btn-secondary p-2 rounded-lg hover:scale-105 transition-all duration-200">
+            <button id="volumeBtn" class="btn-secondary p-2 rounded-lg hover:scale-105 transition-all duration-200" title="Toggle mute">
               <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
               </svg>
             </button>
-            <input type="range" id="volumeSlider" class="w-20 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer slider" min="0" max="1" step="0.1" value="0.7">
+            <input type="range" id="volumeSlider" class="w-24 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer slider" min="0" max="1" step="0.1" value="0.7">
           </div>
         </div>
       </div>
-    </main>
+    </div>
   </div>
 
   <!-- Artist Profile Modal -->
@@ -1162,6 +1190,7 @@
       </button>
       <h2 id="artistName" class="text-xl font-bold"></h2>
       <p id="artistBio" class="text-sm text-white/70 mt-2"></p>
+      <button id="editArtistBioButton" class="hidden mt-4 rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400">Edit Bio</button>
       <h3 class="mt-4 text-sm font-semibold">Artist Songs</h3>
       <div id="artistSongs" class="space-y-2 mt-2"></div>
     </div>
@@ -1252,6 +1281,35 @@
         <button onclick="backToContactOptions()" class="w-full rounded-lg bg-white/10 px-6 py-3 font-semibold text-white transition hover:bg-white/20">
           Back
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Playlist Modal -->
+  <div id="playlistModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm">
+    <div class="relative max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-black/90 p-6 shadow-2xl">
+      <button class="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20" onclick="closePlaylistModal()">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      <div class="grid gap-6 lg:grid-cols-[260px_1fr] h-full">
+        <div class="space-y-4 overflow-y-auto pr-2">
+          <div>
+            <h2 class="text-2xl font-semibold text-white">My Playlists</h2>
+            <p class="text-sm text-white/60">Select a playlist below.</p>
+          </div>
+          <div id="playlistList" class="space-y-3"></div>
+        </div>
+        <div class="rounded-3xl border border-white/10 bg-white/5 p-6 overflow-y-auto">
+          <div class="flex items-center justify-between gap-4 mb-6">
+            <div>
+              <p id="playlistTitle" class="text-xl font-semibold text-white">Playlist</p>
+              <p class="text-sm text-white/60">Choose a playlist to view its songs.</p>
+            </div>
+          </div>
+          <div id="playlistSongs" class="space-y-3"></div>
+        </div>
       </div>
     </div>
   </div>
