@@ -8,12 +8,12 @@ let isPlaying = false
 let repeatMode = 0
 let isShuffle = false
 let likedSongs = JSON.parse(localStorage.getItem('likedSongs')) || []
-let userPlaylist = JSON.parse(localStorage.getItem('userPlaylist')) || []
+let userPlaylists = JSON.parse(localStorage.getItem('userPlaylists')) || []
+let currentPlaylistIndex = 0
 let recentlyPlayed = JSON.parse(localStorage.getItem('recentlyPlayed')) || []
 let songsPlayedCount = 0
 let advertData = null
 let allAdverts = []
-let currentAdvertIndex = 0
 let currentUser = null
 
 // DOM elements
@@ -56,6 +56,25 @@ function logout() {
   localStorage.removeItem('user')
   currentUser = null
   location.reload()
+}
+
+function ensurePlaylists() {
+  if (!Array.isArray(userPlaylists)) {
+    userPlaylists = []
+  }
+
+  if (userPlaylists.length === 0) {
+    userPlaylists.push({ id: Date.now(), name: 'Favorites', songs: [] })
+  }
+
+  const saved = localStorage.getItem('userPlaylists')
+  if (!saved) {
+    localStorage.setItem('userPlaylists', JSON.stringify(userPlaylists))
+  }
+}
+
+function savePlaylists() {
+  localStorage.setItem('userPlaylists', JSON.stringify(userPlaylists))
 }
 
 // Bottom player bar
@@ -103,6 +122,7 @@ async function loadSongs(){
     
     currentFilteredSongs = allSongs
     currentPage = 1
+    ensurePlaylists()
     renderCurrentPage()
     updateRecentlyPlayed()
     loadAdvertData()
@@ -128,7 +148,7 @@ function displaySongs(songs){
       
       <div class="song-row-info">
         <p class="song-row-title">${song.title}</p>
-        <p class="song-row-artist">${song.artist}</p>
+        <p class="song-row-artist artist-link" data-artist="${song.artist}">${song.artist}</p>
         <p class="song-row-plays">${song.plays || 0} plays</p>
       </div>
       
@@ -194,6 +214,15 @@ function displaySongs(songs){
       addToPlaylist(song)
     })
 
+    // Artist name click opens profile
+    const artistLink = row.querySelector('.artist-link')
+    if (artistLink) {
+      artistLink.addEventListener('click', (e) => {
+        e.stopPropagation()
+        showArtistProfile(artistLink.getAttribute('data-artist') || song.artist)
+      })
+    }
+
     // Row click to play
     row.addEventListener("click", () => {
       currentIndex = allSongs.findIndex(s => s.id === song.id)
@@ -228,15 +257,114 @@ function updateRecentlyPlayed() {
   })
 }
 
-function savePlaylists() {
-  localStorage.setItem('userPlaylist', JSON.stringify(userPlaylist))
+function getActivePlaylist() {
+  if (userPlaylists.length === 0) {
+    userPlaylists.push({ id: Date.now(), name: 'Favorites', songs: [] })
+  }
+  if (currentPlaylistIndex >= userPlaylists.length) {
+    currentPlaylistIndex = 0
+  }
+  return userPlaylists[currentPlaylistIndex]
 }
 
 function addToPlaylist(song) {
-  if (!userPlaylist.find(item => item.id === song.id)) {
-    userPlaylist.push(song)
+  const activePlaylist = getActivePlaylist()
+  if (!activePlaylist.songs.find(item => item.id === song.id)) {
+    activePlaylist.songs.push(song)
     savePlaylists()
-    showToast('Added to playlist')
+    showToast(`Added "${song.title}" to ${activePlaylist.name}`)
+  } else {
+    showToast(`Song is already in ${activePlaylist.name}`)
+  }
+}
+
+function removeFromPlaylist(songId, playlistId) {
+  const playlist = userPlaylists.find(p => p.id === playlistId)
+  if (!playlist) return
+  playlist.songs = playlist.songs.filter(song => song.id !== songId)
+  savePlaylists()
+  renderPlaylistModal()
+}
+
+function createPlaylist(name) {
+  if (!name || !name.trim()) {
+    showToast('Enter a valid playlist name')
+    return
+  }
+
+  const trimmedName = name.trim()
+  if (userPlaylists.find(p => p.name.toLowerCase() === trimmedName.toLowerCase())) {
+    showToast('Playlist name already exists')
+    return
+  }
+
+  userPlaylists.push({ id: Date.now(), name: trimmedName, songs: [] })
+  currentPlaylistIndex = userPlaylists.length - 1
+  savePlaylists()
+  renderPlaylistModal()
+  showToast(`Created playlist ${trimmedName}`)
+}
+
+function selectPlaylist(index) {
+  if (index < 0 || index >= userPlaylists.length) return
+  currentPlaylistIndex = index
+  savePlaylists()
+  renderPlaylistModal()
+}
+
+function renderPlaylistModal() {
+  const playlistModal = document.getElementById('playlistModal')
+  const playlistList = document.getElementById('playlistList')
+  const playlistSongs = document.getElementById('playlistSongs')
+  const playlistTitle = document.getElementById('playlistTitle')
+
+  if (!playlistModal || !playlistList || !playlistSongs || !playlistTitle) return
+
+  playlistList.innerHTML = ''
+  userPlaylists.forEach((playlist, index) => {
+    const button = document.createElement('button')
+    button.className = `px-3 py-2 rounded-lg text-left w-full ${index === currentPlaylistIndex ? 'bg-indigo-500 text-white' : 'bg-white/10 text-white hover:bg-white/20'}`
+    button.textContent = playlist.name
+    button.onclick = () => selectPlaylist(index)
+    playlistList.appendChild(button)
+  })
+
+  const activePlaylist = getActivePlaylist()
+  playlistTitle.textContent = `${activePlaylist.name} (${activePlaylist.songs.length})`
+
+  playlistSongs.innerHTML = ''
+  if (activePlaylist.songs.length === 0) {
+    playlistSongs.innerHTML = '<p class="text-white/60">No songs in this playlist yet.</p>'
+  } else {
+    activePlaylist.songs.forEach(song => {
+      const item = document.createElement('div')
+      item.className = 'song-row'
+      item.innerHTML = `<div class="song-row-info"><p class="song-row-title">${song.title}</p><p class="song-row-artist">${song.artist}</p></div><button class="song-row-btn" title="Remove">✕</button>`
+      item.querySelector('button').addEventListener('click', (e) => {
+        e.stopPropagation()
+        removeFromPlaylist(song.id, activePlaylist.id)
+      })
+      item.addEventListener('click', () => playSong(song))
+      playlistSongs.appendChild(item)
+    })
+  }
+}
+
+function openPlaylistModal() {
+  ensurePlaylists()
+  renderPlaylistModal()
+  const playlistModal = document.getElementById('playlistModal')
+  if (playlistModal) {
+    playlistModal.classList.remove('hidden')
+    playlistModal.classList.add('flex')
+  }
+}
+
+function closePlaylistModal() {
+  const playlistModal = document.getElementById('playlistModal')
+  if (playlistModal) {
+    playlistModal.classList.add('hidden')
+    playlistModal.classList.remove('flex')
   }
 }
 
@@ -267,6 +395,8 @@ async function playSong(song) {
   audio.src = audioUrl
   
   playerBarCover.src = song.cover || song.artwork || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 200%22%3E%3Crect fill=%22%23333%22 width=%22200%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-size=%2230%22%3E🎵%3C/text%3E%3C/svg%3E'
+  document.getElementById('playerBarDescription').innerText = `Description: ${song.description || 'N/A'}`
+  document.getElementById('playerBarLyrics').innerText = `Lyrics: ${song.lyrics ? song.lyrics.slice(0, 120) + (song.lyrics.length > 120 ? '...' : '') : 'N/A'}`
   playerBarTime.innerText = "0:00"
   playerBarDuration.innerText = "0:00"
 
@@ -486,6 +616,55 @@ playerBarPlayBtn.addEventListener("click", (e) => {
   }
 })
 
+// Previous/Next controls
+document.getElementById('playerBarPrevBtn').addEventListener('click', () => {
+  if (currentIndex > 0) {
+    currentIndex--
+    playSong(allSongs[currentIndex])
+  }
+})
+
+document.getElementById('playerBarNextBtn').addEventListener('click', () => {
+  if (currentIndex < allSongs.length - 1) {
+    currentIndex++
+    playSong(allSongs[currentIndex])
+  }
+})
+
+// Volume controls
+const volumeSlider = document.getElementById('volumeSlider')
+const volumeBtn = document.getElementById('volumeBtn')
+
+volumeSlider.addEventListener('input', (e) => {
+  audio.volume = e.target.value
+  updateVolumeIcon()
+})
+
+volumeBtn.addEventListener('click', () => {
+  if (audio.volume > 0) {
+    audio.volume = 0
+    volumeSlider.value = 0
+  } else {
+    audio.volume = 0.7
+    volumeSlider.value = 0.7
+  }
+  updateVolumeIcon()
+})
+
+function updateVolumeIcon() {
+  const icon = audio.volume === 0
+    ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 7l2 2m0 0l2 2m-2-2l-2 2m2-2l2-2"/>'
+    : audio.volume < 0.5
+    ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM15.657 8.343a1 1 0 010 1.414A7.994 7.994 0 0017 11a7.994 7.994 0 00-.343 2.657 1 1 0 01-1.414.707 6 6 0 010-8.485 1 1 0 011.414.707z"/>'
+    : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>'
+  volumeBtn.innerHTML = `<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">${icon}</svg>`
+}
+
+// Initialize volume
+audio.volume = 0.7
+volumeSlider.value = 0.7
+updateVolumeIcon()
+
 // Contact Modal Functions
 const contactModal = document.getElementById("contactModal")
 const contactClose = document.getElementById("contactClose")
@@ -614,6 +793,94 @@ function sendWhatsAppMessage(type) {
   contactModal.classList.remove("flex")
 }
 
+function toggleArtistModal(show = true) {
+  const modal = document.getElementById('artistModal')
+  if (show) {
+    modal.classList.remove('hidden')
+    modal.classList.add('flex')
+  } else {
+    modal.classList.add('hidden')
+    modal.classList.remove('flex')
+  }
+}
+
+let currentArtistProfile = null
+
+async function showArtistProfile(artist) {
+  const artistNameEl = document.getElementById('artistName')
+  const artistBioEl = document.getElementById('artistBio')
+  const artistSongsContainer = document.getElementById('artistSongs')
+  const editBioButton = document.getElementById('editArtistBioButton')
+
+  artistNameEl.innerText = artist
+  artistSongsContainer.innerHTML = '<p class="text-white/70">Loading songs...</p>'
+
+  const response = await fetch(`/artist/${encodeURIComponent(artist)}`)
+  if (!response.ok) {
+    artistBioEl.innerText = 'Bio: Not available'
+    artistSongsContainer.innerHTML = ''
+    showToast('Could not load artist profile.')
+    return
+  }
+
+  const data = await response.json()
+  if (!data.success) {
+    artistBioEl.innerText = 'Bio: Not available'
+    artistSongsContainer.innerHTML = ''
+    return
+  }
+
+  currentArtistProfile = data.artist
+
+  artistNameEl.innerText = currentArtistProfile.name
+  artistBioEl.innerText = `Bio: ${currentArtistProfile.bio || 'No bio available yet'}`
+
+  artistSongsContainer.innerHTML = ''
+  if (!data.songs || data.songs.length === 0) {
+    artistSongsContainer.innerHTML = '<p class="text-white/70">No songs available for this artist</p>'
+  } else {
+    data.songs.forEach(song => {
+      const item = document.createElement('div')
+      item.className = 'song-row'
+      item.innerHTML = `<div class="song-row-info"><p class="song-row-title">${song.title}</p><p class="song-row-artist">${song.artist}</p></div>`
+      item.addEventListener('click', () => {
+        playSong(song)
+        toggleArtistModal(false)
+      })
+      artistSongsContainer.appendChild(item)
+    })
+  }
+
+  if (currentUser && currentUser.accountType === 'artist' && currentUser.username.toLowerCase() === artist.toLowerCase()) {
+    editBioButton.classList.remove('hidden')
+    editBioButton.onclick = async () => {
+      const newBio = prompt('Set your artist bio', currentArtistProfile.bio || '')
+      if (!newBio) return
+      const token = localStorage.getItem('token')
+      const editResponse = await fetch(`/artist/${encodeURIComponent(artist)}/bio`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ bio: newBio })
+      })
+      const editData = await editResponse.json()
+      if (editData.success) {
+        currentArtistProfile.bio = newBio
+        artistBioEl.innerText = `Bio: ${newBio}`
+        showToast('Artist bio updated')
+      } else {
+        showToast(editData.message || 'Could not update bio')
+      }
+    }
+  } else {
+    editBioButton.classList.add('hidden')
+  }
+
+  toggleArtistModal(true)
+}
+
 // Update progress on click
 playerBarProgress.parentElement.addEventListener("click", (e) => {
   if (!audio.duration) return
@@ -647,14 +914,6 @@ nextPageButton.addEventListener('click', () => {
     currentPage++
     renderCurrentPage()
   }
-})
-
-// Theme toggle
-const themeToggleBtn = document.getElementById('themeToggle')
-themeToggleBtn.addEventListener('click', () => {
-  document.body.classList.toggle('light-mode')
-  const active = document.body.classList.contains('light-mode')
-  themeToggleBtn.textContent = active ? '🌞 Light' : '🌙 Dark'
 })
 
 // Load trending

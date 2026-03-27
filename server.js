@@ -17,10 +17,19 @@ const MusicScheduler = require("./api/scheduler")
 
 const app = express()
 
-app.use(cors())
+app.use(cors({
+  origin: true,
+  credentials: true
+}))
 app.use(express.json())
 app.use(express.static("public"))
-app.use("/uploads",express.static("uploads"))
+app.use("/uploads", express.static("uploads", {
+  setHeaders: (res, path) => {
+    res.set('Access-Control-Allow-Origin', '*')
+    res.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+    res.set('Cache-Control', 'public, max-age=31536000')
+  }
+}))
 
 // JWT Secret
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-in-production"
@@ -70,11 +79,21 @@ db.serialize(() => {
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   artist TEXT,
   title TEXT,
+  description TEXT,
+  lyrics TEXT,
   cover TEXT,
   audio TEXT,
   plays INTEGER DEFAULT 0
   )
   `)
+
+  // Add missing columns if database upgrades from old schema
+  db.run("ALTER TABLE songs ADD COLUMN description TEXT", (err) => {
+    if (err && !err.message.includes('duplicate column name')) console.log('Could not add description column to songs:', err.message)
+  })
+  db.run("ALTER TABLE songs ADD COLUMN lyrics TEXT", (err) => {
+    if (err && !err.message.includes('duplicate column name')) console.log('Could not add lyrics column to songs:', err.message)
+  })
 
   // Create adverts table
   db.run(`
@@ -143,10 +162,15 @@ db.serialize(() => {
   authProvider TEXT NOT NULL DEFAULT 'local',
   providerId TEXT,
   profilePicture TEXT,
+  bio TEXT,
   createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
   updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
   )
   `)
+
+  db.run("ALTER TABLE users ADD COLUMN bio TEXT", (err) => {
+    if (err && !err.message.includes('duplicate column name')) console.log('Could not add bio column to users:', err.message)
+  })
 
   // Create OTP table for password recovery
   db.run(`
@@ -510,7 +534,8 @@ app.get("/auth/user", verifyToken, (req, res) => {
         username: user.username,
         email: user.email,
         accountType: user.accountType,
-        profilePicture: user.profilePicture
+        profilePicture: user.profilePicture,
+        bio: user.bio || ''
       }
     });
   });
@@ -787,8 +812,10 @@ if(!req.files || !req.files.cover || !req.files.audio){
 return res.json({success: false, message:"Files missing"})
 }
 
-const cover = req.files.cover[0].path
-const audio = req.files.audio[0].path
+const cover = `uploads/covers/${Date.now()}-${file.originalname}`
+const audio = `uploads/audio/${Date.now()}-${file.originalname}`
+const description = req.body.description || ''
+const lyrics = req.body.lyrics || ''
 
 // Validate files exist before inserting to database
 if (!fs.existsSync(cover) || !fs.existsSync(audio)) {
@@ -796,8 +823,8 @@ if (!fs.existsSync(cover) || !fs.existsSync(audio)) {
 }
 
 db.run(
-"INSERT INTO songs (artist,title,cover,audio) VALUES (?,?,?,?)",
-[artist,title,cover,audio],
+"INSERT INTO songs (artist,title,description,lyrics,cover,audio) VALUES (?,?,?,?,?,?)",
+[artist,title,description,lyrics,cover,audio],
 function(err){
 
 if(err){
@@ -831,8 +858,10 @@ return res.json([])
 // Normalize file paths to absolute URLs (e.g., "uploads/audio/file.mp3" -> "/uploads/audio/file.mp3")
 const normalizedRows = rows.map(song => ({
   ...song,
-  audio: song.audio && !song.audio.startsWith('/') ? '/' + song.audio : song.audio,
-  cover: song.cover && !song.cover.startsWith('/') ? '/' + song.cover : song.cover
+  audio: song.audio ? (song.audio.startsWith('/') ? song.audio : '/' + song.audio) : null,
+  cover: song.cover ? (song.cover.startsWith('/') ? song.cover : '/' + song.cover) : null,
+  description: song.description || '',
+  lyrics: song.lyrics || ''
 }))
 
 res.json(normalizedRows)
@@ -840,6 +869,56 @@ res.json(normalizedRows)
 })
 
 })
+
+/* ARTIST PROFILE */
+
+app.get('/artist/:name', (req, res) => {
+  const artistName = req.params.name;
+
+  db.all("SELECT * FROM songs WHERE LOWER(artist) = LOWER(?)", [artistName], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Error fetching artist songs' });
+    }
+
+    db.get("SELECT id, username, email, accountType, profilePicture, bio FROM users WHERE LOWER(username) = LOWER(?)", [artistName], (err2, user) => {
+      if (err2) {
+        return res.status(500).json({ success: false, message: 'Error fetching artist profile' });
+      }
+
+      res.json({
+        success: true,
+        artist: {
+          name: artistName,
+          bio: user ? (user.bio || '') : '',
+          profilePicture: user ? user.profilePicture : '',
+          accountType: user ? user.accountType : 'streamer'
+        },
+        songs: rows
+      });
+    });
+  });
+});
+
+app.put('/artist/:name/bio', verifyToken, (req, res) => {
+  const artistName = req.params.name;
+  const { bio } = req.body;
+
+  if (!bio) {
+    return res.status(400).json({ success: false, message: 'Bio is required' });
+  }
+
+  if (!req.user || req.user.username.toLowerCase() !== artistName.toLowerCase()) {
+    return res.status(403).json({ success: false, message: 'You can only edit your own bio' });
+  }
+
+  db.run("UPDATE users SET bio = ? WHERE id = ?", [bio, req.user.id], function(err) {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Update bio failed' });
+    }
+
+    res.json({ success: true, message: 'Bio updated' });
+  });
+});
 
 /* PLAY COUNT */
 
@@ -1306,8 +1385,8 @@ app.get("/admin/import/stats", (req, res) => {
 
 /* START SERVER */
 
-app.listen(5000,()=>{
+const PORT = process.env.PORT || 3000;
 
-console.log("Server running on http://localhost:5000")
-
-})
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+});
