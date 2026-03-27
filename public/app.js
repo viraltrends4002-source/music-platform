@@ -121,18 +121,21 @@ function displaySongs(songs){
       <div class="song-row-info">
         <p class="song-row-title">${song.title}</p>
         <p class="song-row-artist">${song.artist}</p>
+        <p class="song-row-plays">${song.plays || 0} plays</p>
       </div>
       
       <div class="song-row-actions">
         <button class="like-btn song-row-btn" data-song-id="${song.id}" title="Like">
           <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none">
-            <path class="like-icon" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            <path class="like-icon" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
         </button>
         
         <button class="download-btn song-row-btn" data-song-id="${song.id}" title="Download">
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
           </svg>
         </button>
         
@@ -156,7 +159,7 @@ function displaySongs(songs){
     const likeBtn = row.querySelector(".like-btn")
     if (isLiked) {
       likeBtn.querySelector('.like-icon').style.fill = 'rgb(239, 68, 68)'
-      likeBtn.querySelector('.like-icon').style.color = 'rgb(239, 68, 68)'
+      likeBtn.querySelector('.like-icon').style.stroke = 'rgb(239, 68, 68)'
     }
     likeBtn.addEventListener("click", (e) => {
       e.stopPropagation()
