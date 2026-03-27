@@ -1,10 +1,15 @@
 // Global variables
 let allSongs = []
+let currentFilteredSongs = []
+let currentPage = 1
+const PAGE_SIZE = 50
 let currentIndex = 0
 let isPlaying = false
 let repeatMode = 0
 let isShuffle = false
 let likedSongs = JSON.parse(localStorage.getItem('likedSongs')) || []
+let userPlaylist = JSON.parse(localStorage.getItem('userPlaylist')) || []
+let recentlyPlayed = JSON.parse(localStorage.getItem('recentlyPlayed')) || []
 let songsPlayedCount = 0
 let advertData = null
 let allAdverts = []
@@ -96,7 +101,10 @@ async function loadSongs(){
       console.log('No user songs to load')
     }
     
-    displaySongs(allSongs)
+    currentFilteredSongs = allSongs
+    currentPage = 1
+    renderCurrentPage()
+    updateRecentlyPlayed()
     loadAdvertData()
   } catch (error) {
     console.error("Error loading songs:", error)
@@ -138,6 +146,12 @@ function displaySongs(songs){
             <line x1="12" y1="15" x2="12" y2="3"/>
           </svg>
         </button>
+
+        <button class="add-to-playlist-btn song-row-btn" data-song-id="${song.id}" title="Add to Playlist">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" fill="none"/>
+          </svg>
+        </button>
         
         <button class="play-btn song-row-btn" data-song-id="${song.id}" title="Play">
           <svg viewBox="0 0 24 24" fill="currentColor">
@@ -173,6 +187,13 @@ function displaySongs(songs){
       downloadSong(song)
     })
 
+    // Add to playlist button
+    const addToPlaylistBtn = row.querySelector(".add-to-playlist-btn")
+    addToPlaylistBtn.addEventListener("click", (e) => {
+      e.stopPropagation()
+      addToPlaylist(song)
+    })
+
     // Row click to play
     row.addEventListener("click", () => {
       currentIndex = allSongs.findIndex(s => s.id === song.id)
@@ -181,6 +202,50 @@ function displaySongs(songs){
 
     songsContainer.appendChild(row)
   })
+}
+
+function renderCurrentPage() {
+  const start = (currentPage - 1) * PAGE_SIZE
+  const end = start + PAGE_SIZE
+  const pageSongs = currentFilteredSongs.slice(start, end)
+  displaySongs(pageSongs)
+  document.getElementById('pageNumber').innerText = currentPage
+
+  document.getElementById('prevPage').disabled = currentPage === 1
+  document.getElementById('nextPage').disabled = end >= currentFilteredSongs.length
+}
+
+function updateRecentlyPlayed() {
+  const container = document.getElementById('recentlyPlayed')
+  container.innerHTML = ''
+
+  const unique = [...new Map(recentlyPlayed.map(song => [song.id, song])).values()].slice(0, 5)
+  unique.forEach(song => {
+    const row = document.createElement('div')
+    row.className = 'song-row'
+    row.innerHTML = `<div class="song-row-info"><p class="song-row-title">${song.title}</p><p class="song-row-artist">${song.artist}</p></div>`
+    container.appendChild(row)
+  })
+}
+
+function savePlaylists() {
+  localStorage.setItem('userPlaylist', JSON.stringify(userPlaylist))
+}
+
+function addToPlaylist(song) {
+  if (!userPlaylist.find(item => item.id === song.id)) {
+    userPlaylist.push(song)
+    savePlaylists()
+    showToast('Added to playlist')
+  }
+}
+
+function showToast(message) {
+  const toast = document.createElement('div')
+  toast.textContent = message
+  toast.className = 'fixed bottom-24 right-6 z-50 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-lg'
+  document.body.appendChild(toast)
+  setTimeout(() => toast.remove(), 1800)
 }
 
 // Play song
@@ -222,13 +287,19 @@ async function playSong(song) {
     song.plays = (song.plays || 0) + 1
     song.play_count = (song.play_count || 0) + 1
     songsPlayedCount++
+
+    // update recently played
+    recentlyPlayed.unshift(song)
+    if (recentlyPlayed.length > 20) recentlyPlayed.pop()
+    localStorage.setItem('recentlyPlayed', JSON.stringify(recentlyPlayed))
+    updateRecentlyPlayed()
     
     // Show advert after every 3 songs
     if (songsPlayedCount % 3 === 0 && advertData) {
       showAdvert()
     }
     
-    displaySongs(allSongs)
+    renderCurrentPage()
   } catch (error) {
     console.error("Error playing song:", error)
     playerBarTitle.innerText = song.title
@@ -554,22 +625,48 @@ playerBarProgress.parentElement.addEventListener("click", (e) => {
 // Search functionality
 document.getElementById("search").addEventListener("input", function() {
   const value = this.value.toLowerCase()
-  const filtered = allSongs.filter(song =>
+  currentFilteredSongs = allSongs.filter(song =>
     song.title.toLowerCase().includes(value) ||
     song.artist.toLowerCase().includes(value)
   )
-  displaySongs(filtered)
+  currentPage = 1
+  renderCurrentPage()
+})
+
+// Pagination controls
+const prevPageButton = document.getElementById('prevPage')
+const nextPageButton = document.getElementById('nextPage')
+prevPageButton.addEventListener('click', () => {
+  if (currentPage > 1) {
+    currentPage--
+    renderCurrentPage()
+  }
+})
+nextPageButton.addEventListener('click', () => {
+  if (currentPage * PAGE_SIZE < currentFilteredSongs.length) {
+    currentPage++
+    renderCurrentPage()
+  }
+})
+
+// Theme toggle
+const themeToggleBtn = document.getElementById('themeToggle')
+themeToggleBtn.addEventListener('click', () => {
+  document.body.classList.toggle('light-mode')
+  const active = document.body.classList.contains('light-mode')
+  themeToggleBtn.textContent = active ? '🌞 Light' : '🌙 Dark'
 })
 
 // Load trending
 function loadTrending() {
   // Sort both imported and uploaded songs by play count
-  const sorted = [...allSongs].sort((a, b) => {
+  currentFilteredSongs = [...allSongs].sort((a, b) => {
     const aPlays = (a.plays || a.play_count || 0)
     const bPlays = (b.plays || b.play_count || 0)
     return bPlays - aPlays
   })
-  displaySongs(sorted)
+  currentPage = 1
+  renderCurrentPage()
 }
 
 // Initialize

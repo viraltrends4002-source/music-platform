@@ -704,6 +704,29 @@
       }
     }
 
+    body.light-mode {
+      background: #f8fafc !important;
+      color: #0f172a;
+    }
+    body.light-mode .sidebar,
+    body.light-mode header,
+    body.light-mode main,
+    body.light-mode footer {
+      background: rgba(255, 255, 255, 0.85);
+      color: #0f172a;
+      border-color: rgba(148, 163, 184, 0.3);
+    }
+    body.light-mode .song-row {
+      background: rgba(15, 23, 42, 0.05);
+      border-color: rgba(148, 163, 184, 0.4);
+    }
+    body.light-mode .song-row-title,
+    body.light-mode .song-row-artist,
+    body.light-mode .song-row-plays {
+      color: #0f172a;
+    }
+
+
     /* Print Styles */
     @media print {
       header, #player, footer {
@@ -804,23 +827,28 @@
 
       <!-- Content section -->
       <div class="px-4 sm:px-6 py-6 sm:py-8">
-        <!-- Song count -->
+        <!-- Song count + controls -->
         <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h2 class="text-2xl sm:text-3xl font-bold">All Songs</h2>
             <p class="mt-1 text-xs sm:text-sm text-white/60"><span id="songCount">0</span> songs available</p>
           </div>
-          <div class="flex flex-col xs:flex-row gap-2 sm:gap-3">
-            <button onclick="loadSongs()" class="rounded-full bg-white/10 px-4 sm:px-6 py-2 text-xs sm:text-sm font-medium text-white transition hover:bg-white/15 whitespace-nowrap">
-              Reset
-            </button>
-            <button onclick="loadTrending()" class="rounded-full bg-indigo-500/20 px-4 sm:px-6 py-2 text-xs sm:text-sm font-medium text-indigo-200 transition hover:bg-indigo-500/30 whitespace-nowrap">
-              Trending
-            </button>
+
+          <div class="flex items-center gap-2 flex-wrap">
+            <button id="themeToggle" class="rounded-full bg-white/10 px-3 py-2 text-xs text-white hover:bg-white/20 transition">🌙 Theme</button>
+            <button onclick="loadSongs()" class="rounded-full bg-white/10 px-3 py-2 text-xs text-white transition hover:bg-white/15">Reset</button>
+            <button onclick="loadTrending()" class="rounded-full bg-indigo-500/20 px-3 py-2 text-xs text-indigo-200 hover:bg-indigo-500/30 transition">Trending</button>
+            <button id="prevPage" class="rounded-full bg-white/10 px-3 py-2 text-xs text-white disabled:opacity-50" disabled>Prev</button>
+            <button id="nextPage" class="rounded-full bg-white/10 px-3 py-2 text-xs text-white disabled:opacity-50" disabled>Next</button>
+            <span class="text-xs text-white/60">Page <span id="pageNumber">1</span></span>
           </div>
         </div>
 
         <!-- Songs List - Horizontal Rows -->
+        <div id="recentlyPlayedSection" class="mb-4">
+          <h3 class="text-sm font-semibold mb-2">Recently Played</h3>
+          <div id="recentlyPlayed" class="space-y-2"></div>
+        </div>
         <div id="songs" class="space-y-2"></div>
       </div>
     </main>
