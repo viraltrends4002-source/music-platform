@@ -147,60 +147,66 @@ function createSongCard(song) {
   const isLiked = musicState.likedSongs.includes(song.id);
   const sourceIcon = getSourceIcon(song.source);
   
-  const card = document.createElement('div');
-  card.className = 'song-card group rounded-lg overflow-hidden bg-white/10 hover:bg-white/20 transition';
-  card.innerHTML = `
-    <div class="relative overflow-hidden h-40 bg-black">
-      <img src="${song.artwork || song.cover}" 
-           alt="${song.title}" 
-           class="w-full h-full object-cover group-hover:scale-110 transition duration-300"
-           loading="lazy"
-      />
-      <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition duration-300">
-        <div class="absolute inset-0 flex items-center justify-center gap-3">
-          <button class="play-btn h-12 w-12 rounded-full bg-indigo-500 hover:bg-indigo-600 flex items-center justify-center text-white transition transform hover:scale-110"
-                  data-song-id="${song.id}">
-            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-          </button>
-          <button class="add-playlist-btn h-10 w-10 rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center text-white transition"
-                  data-song-id="${song.id}">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition">
-        <button class="like-btn h-8 w-8 rounded-full bg-white/30 hover:bg-white/50 flex items-center justify-center transition"
-                data-song-id="${song.id}">
-          <svg class="h-4 w-4 ${isLiked ? 'fill-red-500 text-red-500' : 'text-white'} transition"
-               viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-          </svg>
-        </button>
-      </div>
+  const row = document.createElement('div');
+  row.className = 'song-row';
+  row.innerHTML = `
+    <img class="song-row-cover" src="${song.artwork || song.cover || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 200%22%3E%3Crect fill=%22%23333%22 width=%22200%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-size=%2230%22%3E🎵%3C/text%3E%3C/svg%3E'}" alt="${song.title} cover" loading="lazy" />
+    
+    <div class="song-row-info">
+      <p class="song-row-title">${song.title}</p>
+      <p class="song-row-artist">${song.artist}</p>
     </div>
     
-    <div class="p-3">
-      <h3 class="font-semibold text-white text-sm line-clamp-2">${song.title}</h3>
-      <p class="text-xs text-white/60 mt-1 line-clamp-1">${song.artist}</p>
+    <div class="song-row-actions">
+      <button class="like-btn song-row-btn" data-song-id="${song.id}" title="Like">
+        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none">
+          <path class="like-icon" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+      </button>
       
-      <div class="flex items-center justify-between mt-3 text-xs">
-        <div class="flex items-center gap-2">
-          <span class="text-white/60 inline-block">${sourceIcon}</span>
-          <span class="text-white/60">${formatPlayCount(song.play_count || 0)}</span>
-        </div>
-        <button class="download-btn text-white/60 hover:text-indigo-400 transition flex items-center gap-1"
-                data-song-id="${song.id}">
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-          </svg>
-        </button>
-      </div>
+      <button class="download-btn song-row-btn" data-song-id="${song.id}" title="Download">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+      </button>
+      
+      <button class="play-btn song-row-btn" data-song-id="${song.id}" title="Play">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      </button>
     </div>
   `;
   
-  return card;
+  // Add event listeners
+  row.addEventListener('click', () => {
+    musicState.currentSongIndex = musicState.allSongs.findIndex(s => s.id === song.id);
+    playSong(song);
+  });
+  
+  const playBtn = row.querySelector('.play-btn');
+  playBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    playSong(song);
+  });
+  
+  const likeBtn = row.querySelector('.like-btn');
+  if (isLiked) {
+    likeBtn.querySelector('.like-icon').style.fill = 'rgb(239, 68, 68)';
+    likeBtn.querySelector('.like-icon').style.color = 'rgb(239, 68, 68)';
+  }
+  likeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleLike(song.id, likeBtn);
+  });
+  
+  const downloadBtn = row.querySelector('.download-btn');
+  downloadBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    downloadSong(song);
+  });
+  
+  return row;
 }
 
 function getSourceIcon(source) {

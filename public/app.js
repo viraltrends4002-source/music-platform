@@ -103,7 +103,7 @@ async function loadSongs(){
   }
 }
 
-// Display songs in grid with modern card styling
+// Display songs in horizontal list with modern row styling (YouTube Music style)
 function displaySongs(songs){
   songsContainer.innerHTML = ""
   songCount.innerText = songs.length
@@ -111,50 +111,41 @@ function displaySongs(songs){
   songs.forEach((song) => {
     const isLiked = likedSongs.includes(song.id)
     
-    // Create song card
-    const div = document.createElement("div")
-    div.className = "song-card group overflow-hidden rounded-xl bg-gradient-to-b from-white/10 to-white/5 ring-1 ring-white/10 overflow-hidden shadow-lg"
+    // Create song row
+    const row = document.createElement("div")
+    row.className = "song-row"
     
-    div.innerHTML = `
-      <div class="relative overflow-hidden cursor-pointer bg-black">
-        <img src="${song.artwork || song.cover || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 200%22%3E%3Crect fill=%22%23333%22 width=%22200%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-size=%2230%22%3E🎵%3C/text%3E%3C/svg%3E'}" alt="${song.title} cover" class="h-40 w-full object-cover transition duration-300 group-hover:scale-110" />
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center">
-          <button class="play-btn flex h-14 w-14 items-center justify-center rounded-full bg-indigo-500 text-white hover:bg-indigo-600 shadow-lg transition transform hover:scale-110" data-song-id="${song.id}">
-            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-          </button>
-        </div>
-        <div class="absolute top-2 right-2">
-          <button class="like-btn flex items-center justify-center h-8 w-8 rounded-full bg-white/20 hover:bg-white/30 transition" data-song-id="${song.id}">
-            <svg class="h-4 w-4 transition ${isLiked ? 'fill-red-500 text-red-500' : 'text-white'}" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
-          </button>
-        </div>
+    row.innerHTML = `
+      <img class="song-row-cover" src="${song.artwork || song.cover || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 200 200%22%3E%3Crect fill=%22%23333%22 width=%22200%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-size=%2230%22%3E🎵%3C/text%3E%3C/svg%3E'}" alt="${song.title} cover" />
+      
+      <div class="song-row-info">
+        <p class="song-row-title">${song.title}</p>
+        <p class="song-row-artist">${song.artist}</p>
       </div>
       
-      <div class="p-4">
-        <h3 class="font-semibold text-white text-sm line-clamp-2">${song.title}</h3>
-        <p class="text-xs text-white/60 mt-1 line-clamp-1">${song.artist}</p>
+      <div class="song-row-actions">
+        <button class="like-btn song-row-btn" data-song-id="${song.id}" title="Like">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none">
+            <path class="like-icon" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+        </button>
         
-        <div class="flex items-center justify-between mt-3 text-xs text-white/60">
-          <div class="flex items-center gap-1">
-            <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M13 13H9v-2h4v2zm0 4H9v2h4v-2zM9 9h4V7H9v2z"/>
-            </svg>
-            ${song.plays || 0}
-          </div>
-          <button class="download-btn flex items-center gap-1 text-white/60 hover:text-indigo-400 transition" data-song-id="${song.id}">
-            <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-            </svg>
-            Download
-          </button>
-        </div>
+        <button class="download-btn song-row-btn" data-song-id="${song.id}" title="Download">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+        </button>
+        
+        <button class="play-btn song-row-btn" data-song-id="${song.id}" title="Play">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </button>
       </div>
     `
 
     // Play button
-    const playBtn = div.querySelector(".play-btn")
+    const playBtn = row.querySelector(".play-btn")
     playBtn.addEventListener("click", (e) => {
       e.stopPropagation()
       currentIndex = allSongs.findIndex(s => s.id === song.id)
@@ -162,26 +153,30 @@ function displaySongs(songs){
     })
 
     // Like button
-    const likeBtn = div.querySelector(".like-btn")
+    const likeBtn = row.querySelector(".like-btn")
+    if (isLiked) {
+      likeBtn.querySelector('.like-icon').style.fill = 'rgb(239, 68, 68)'
+      likeBtn.querySelector('.like-icon').style.color = 'rgb(239, 68, 68)'
+    }
     likeBtn.addEventListener("click", (e) => {
       e.stopPropagation()
       toggleLike(song.id, likeBtn)
     })
 
     // Download button
-    const downloadBtn = div.querySelector(".download-btn")
+    const downloadBtn = row.querySelector(".download-btn")
     downloadBtn.addEventListener("click", (e) => {
       e.stopPropagation()
       downloadSong(song)
     })
 
-    // Card click to play
-    div.addEventListener("click", () => {
+    // Row click to play
+    row.addEventListener("click", () => {
       currentIndex = allSongs.findIndex(s => s.id === song.id)
       playSong(allSongs[currentIndex])
     })
 
-    songsContainer.appendChild(div)
+    songsContainer.appendChild(row)
   })
 }
 
